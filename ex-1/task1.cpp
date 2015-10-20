@@ -6,18 +6,13 @@ using namespace std;
 
 int n = 3;
 int goal[] = {1, 2, 3, 4, 5, 6, 7, 8, 0};
-int a[] = {6, 5, 3, 2, 4, 8, 7, 0, 1};
-//int a[] = {1, 2, 3, 4, 5, 6, 7, 0, 8};
-// power of 2
-int dist[524288];
-
-void getInput()
-{
-	for(int i = 0; i < n * n; i++)
-	{
-		cin>>a[i];
-	}
-}
+//int a[] = {6, 5, 3, 2, 4, 8, 7, 0, 1};
+//int a[] = {8, 1, 3, 2, 0, 5, 7, 6, 4};
+//int a[] = {1, 2, 3, 4, 5, 6, 0, 7, 8};
+int a[] = {2, 0, 3, 1, 7, 4, 8, 6, 5};
+//362880
+int dist[362881];
+int previous[362881];
 
 int fact(int base)
 {
@@ -44,9 +39,10 @@ int indexOf(int *arr, int size)
 	return (k * fact(size-1)) + indexOf(arr + 1, size -1);   
 }
 
-bool isValid(int x, int y)
+int getDistance(int *state)
 {
-	return 0 <= x && x < n && 0 <=y && y < n;
+	int i = indexOf(state, n*n);
+	return dist[i] - 1;
 }
 
 int* getNextState(int *state, int oldx, int oldy, int nextx, int nexty)
@@ -63,10 +59,9 @@ int* getNextState(int *state, int oldx, int oldy, int nextx, int nexty)
 	return nextState;
 }
 
-int getDistance(int *state)
+bool isValid(int x, int y)
 {
-	int i = indexOf(state, n*n);
-	return dist[i] - 1;
+	return 0 <= x && x < n && 0 <=y && y < n;
 }
 
 bool equalStates(int *source, int *target)
@@ -81,6 +76,33 @@ bool equalStates(int *source, int *target)
 	return true;
 }
 
+bool shouldGoThere(int *nextState)
+{
+	int i = indexOf(nextState, n*n);
+	return getDistance(nextState) == 0 && previous[i] == 0;
+}
+
+bool goalReachable(int *currentState)
+{
+	int inversions = 0;
+	for (int i = 0; i < n*n; i++)
+	{
+		for (int j = i + 1; j < n * n; j++)
+		{
+			inversions += (currentState[j] && currentState[i] > currentState[j]) ? 1 : 0;
+		}
+	}
+	return inversions % 2 == 0;
+}
+
+void getInput()
+{
+	for(int i = 0; i < n * n; i++)
+	{
+		cin>>a[i];
+	}
+}
+
 void visit(int *currentState, int* prevState)
 {
 	int steps;
@@ -88,22 +110,24 @@ void visit(int *currentState, int* prevState)
 	if(prevState == NULL)
 	{
 		steps = 1;
+		previous[curr] = -1;
 	}
 	else
 	{
 		int prev = indexOf(prevState, n*n);
 		steps = dist[prev] + 1;
+		previous[curr] = prev;
 	}
 	dist[curr] = steps;
 }
 
-bool isNotVisited(int *nextState)
+int bfs(int *start)
 {
-	return getDistance(nextState) < 0;
-}
+	if(!goalReachable(start))
+	{
+		return -2;
+	}
 
-int bfs(int *start, int *end)
-{
 	int startX, startY;
 	for (int i = 0; i < n*n; i++)
 	{
@@ -120,13 +144,14 @@ int bfs(int *start, int *end)
 	queue<pair<int, int>> q;
 	queue<int*> states;
 
-	pair<int, int> k (startX,startY);
 	int *currentState = start;
 	int *nextState;
+
+	pair<int, int> k (startX,startY);
 	q.push(k);
 	states.push(start);
 	visit(start, NULL);
-
+	
 	while(!q.empty())
 	{
 		int nextX, nextY;
@@ -148,25 +173,24 @@ int bfs(int *start, int *end)
 			if(isValid(nextX, nextY))
 			{
 				nextState = getNextState(currentState, k.first, k.second, nextX, nextY);
-				if(isNotVisited(nextState)) // from *start to *start the distance is always 0
+				if(shouldGoThere(nextState)) // from *start to *start the distance would be 1
 				{
+					visit(nextState, currentState);
 					q.push(make_pair(nextX, nextY));
 					states.push(nextState);
-
-					visit(nextState, currentState);
 				}
 			}
 		}
 		//delete currentState;
 	}
-	return 0;
+	printf("%d -> %d\n", indexOf(goal, n*n), getDistance(goal));
+	return -3;
 }
 
 int main()
 {
 	//getInput();
-	int d = bfs(a, goal);
+	int d = bfs(a);
 	printf("%d\n", d);
 	return 0;
 }
-
