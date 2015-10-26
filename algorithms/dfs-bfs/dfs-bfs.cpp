@@ -107,7 +107,6 @@ bool _dfs(int startX, int startY, int endX, int endY)
 				visit(nextX, nextY, startX, startY);
 				if(_dfs(nextX, nextY, endX, endY))
 				{
-					printf("(%d, %d)\n", nextX, nextY);
 					return true;
 				}
 			}
