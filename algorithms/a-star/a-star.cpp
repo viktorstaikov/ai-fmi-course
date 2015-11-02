@@ -109,13 +109,5 @@ int main()
 	int d = a_star(startX, startY, endX, endY);
 	printf("%d\n", d);
 
-	// for (int i = 0; i < N; ++i)
-	// {
-	// 	for (int j = 0; j < M; ++j)
-	// 	{
-	// 		printf(" %d,%d/%2d ", i, j, visited[i + N*j]);
-	// 	}
-	// 	printf("\n\n");
-	// }
 	return 0;
 }
