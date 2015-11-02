@@ -15,7 +15,8 @@ string filename = "input.txt";
 int N, POPULATION_SIZE;
 vector<vector<int> > D;
 
-struct Element {
+class Element {
+public:
     vector<int> towns;
 
     Element(vector<int> p)
@@ -25,15 +26,15 @@ struct Element {
 
     int fitness()
     {
-        int fitness = 0;
+        int f = 0;
 
         int from, to;
         for (int i = 0; i < N; ++i) {
-            from = i;
-            to = (i + 1) % N;
-            fitness += D[from][to];
+            from = this->towns[i];
+            to = this->towns[(i + 1) % N];
+            f += D[from][to];
         }
-        return fitness;
+        return f;
     }
 
     void mutate(double probability)
@@ -111,7 +112,7 @@ void solve(int iterations, double mutationProbability)
 
     int male, female;
 
-    randomPopulation(POPULATION_SIZE, &v, &pq);
+    randomPopulation(POPULATION_SIZE, v, pq);
 
     while (iterations--) {
         male = rand() % POPULATION_SIZE;
@@ -120,7 +121,7 @@ void solve(int iterations, double mutationProbability)
 
         child.mutate(mutationProbability);
 
-        if (child.fitness() > pq.front().fitness()) {
+        if (child.fitness() > pq.top().fitness()) {
             pq.pop();
             pq.push(child);
         }
