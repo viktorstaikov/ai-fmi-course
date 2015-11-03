@@ -18,13 +18,15 @@ vector<vector<int> > D;
 class Element {
 public:
     vector<int> towns;
+    int fitness;
 
     Element(vector<int> p)
     {
-        towns = p;
+        this->towns = p;
+        this->updateFitness();
     }
 
-    int fitness()
+    void updateFitness()
     {
         int f = 0;
 
@@ -34,7 +36,7 @@ public:
             to = this->towns[(i + 1) % N];
             f += D[from][to];
         }
-        return f;
+        this->fitness = f;
     }
 
     void mutate(double probability)
@@ -50,12 +52,14 @@ public:
         int indexTo = (1 - rand_num) * towns.size();
 
         swap(towns[indexFrom], towns[indexTo]);
+
+        this->updateFitness();
     }
 };
 
 bool operator<(const Element& l, const Element& r)
 {
-    return l.fitness() < r.fitness();
+    return l.fitness < r.fitness;
 }
 
 Element crossover(const Element& male, const Element& female)
@@ -64,14 +68,17 @@ Element crossover(const Element& male, const Element& female)
     for (int i = 0; i < male.towns.size() / 2; ++i) {
         p.push_back(male.towns[i]);
     }
-    vector<int>::iterator it;
+
     for (int i = 0; i < female.towns.size(); ++i) {
-        it = find(p.begin(), p.end(), female.towns[i]);
-        if (it != p.end()) {
-            p.push_back(female.towns[i]);
+        bool contains = false;
+        for (int j = 0; j < p.size(); j++) {
+            contains |= female.towns[i] == p[j];
         }
+        if (!contains)
+            p.push_back(female.towns[i]);
     }
-    return Element(p);
+    auto e = Element(p);
+    return e;
 }
 
 void readInput()
@@ -91,7 +98,7 @@ void readInput()
     fin >> POPULATION_SIZE;
 }
 
-void randomPopulation(int size, vector<Element>& v, priority_queue<Element> pq)
+void randomPopulation(int size, vector<Element>& v, priority_queue<Element>& pq)
 {
     int index;
     for (int i = 0; i < size; ++i) {
@@ -111,21 +118,34 @@ void solve(int iterations, double mutationProbability)
     priority_queue<Element> pq;
 
     int male, female;
+    int i = 0;
 
     randomPopulation(POPULATION_SIZE, v, pq);
 
-    while (iterations--) {
+    while (i < iterations) {
+        i++;
+
         male = rand() % POPULATION_SIZE;
         female = rand() % POPULATION_SIZE;
+
         Element child = crossover(v[male], v[female]);
 
         child.mutate(mutationProbability);
 
-        if (child.fitness() > pq.top().fitness()) {
+        Element leastFit = pq.top();
+        if (child.fitness > leastFit.fitness) {
             pq.pop();
             pq.push(child);
         }
     }
+
+    Element best = pq.top();
+    pq.pop();
+    while (!pq.empty()) {
+        best = pq.top();
+        pq.pop();
+    }
+    cout << best.fitness << endl;
 }
 
 int main()
@@ -133,6 +153,6 @@ int main()
     srand(time(NULL));
 
     readInput();
-
+    solve(1000000, 0.1);
     return 0;
 }
