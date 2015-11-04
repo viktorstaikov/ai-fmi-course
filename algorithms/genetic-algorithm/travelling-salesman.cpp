@@ -10,10 +10,29 @@
 
 using namespace std;
 
-string filename = "input.txt";
+string filename = "input10.txt";
 
-int N, POPULATION_SIZE;
+int N, POPULATION_SIZE, ITERATIONS;
 vector<vector<int> > D;
+
+void readInput()
+{
+    ifstream fin;
+    fin.open(filename);
+    fin >> N;
+    int e;
+    for (int i = 0; i < N; ++i) {
+        vector<int> v;
+        for (int j = 0; j < N; ++j) {
+            fin >> e;
+            v.push_back(e);
+        }
+        D.push_back(v);
+    }
+    fin >> POPULATION_SIZE;
+}
+
+/* GENETIC ALGORITHM*/
 
 class Element {
 public:
@@ -81,23 +100,6 @@ Element crossover(const Element& male, const Element& female)
     return e;
 }
 
-void readInput()
-{
-    ifstream fin;
-    fin.open(filename);
-    fin >> N;
-    int e;
-    for (int i = 0; i < N; ++i) {
-        vector<int> v;
-        for (int j = 0; j < N; ++j) {
-            fin >> e;
-            v.push_back(e);
-        }
-        D.push_back(v);
-    }
-    fin >> POPULATION_SIZE;
-}
-
 void randomPopulation(int size, vector<Element>& v, priority_queue<Element>& pq)
 {
     int index;
@@ -112,7 +114,7 @@ void randomPopulation(int size, vector<Element>& v, priority_queue<Element>& pq)
     }
 }
 
-void solve(int iterations, double mutationProbability)
+void solveGenetic(int iterations, double mutationProbability)
 {
     vector<Element> v;
     priority_queue<Element> pq;
@@ -151,11 +153,44 @@ void solve(int iterations, double mutationProbability)
     cout << best.fitness << endl;
 }
 
+/* BRUTE FORCE */
+
+int pathLenght(vector<int> v)
+{
+    int length = 0;
+    int sz = v.size();
+    int from, to;
+    for (int i = 0; i < sz; ++i) {
+        from = v[i];
+        to = v[(i + 1) % sz];
+        length += D[from][to];
+    }
+    return length;
+}
+
+void solveBrute()
+{
+    vector<int> v;
+    for (int i = 0; i < N; ++i) {
+        v.push_back(i);
+    }
+
+    int answer = pathLenght(v);
+
+    while (next_permutation(v.begin(), v.end())) {
+        int current = pathLenght(v);
+        answer = answer < current ? answer : current;
+    }
+
+    cout << answer << endl;
+}
+
 int main()
 {
     srand(time(NULL));
 
     readInput();
-    solve(1000000, 0.1);
+    solveGenetic(ITERATIONS, 0.1);
+    //solveBrute();
     return 0;
 }
