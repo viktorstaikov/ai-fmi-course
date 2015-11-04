@@ -135,7 +135,10 @@ void solve(int iterations, double mutationProbability)
         Element leastFit = pq.top();
         if (child.fitness > leastFit.fitness) {
             pq.pop();
-            pq.push(child);
+            // substitute the elements
+            leastFit.towns = child.towns;
+            leastFit.fitness = child.fitness;
+            pq.push(leastFit);
         }
     }
 
