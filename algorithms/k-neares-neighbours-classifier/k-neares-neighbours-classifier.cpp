@@ -34,7 +34,7 @@
 
 using namespace std;
 
-int K = 3;
+int K = 15;
 
 string input_data_file = "iris_train.txt";
 string test_data_file = "iris_test.txt";
@@ -131,11 +131,16 @@ void SplitTheInputData()
 double Distance(const IrisPlant& a, const IrisPlant& b)
 {
     double d = 0;
-    d += fabs(a.sepallength - b.sepallength) / value_range.sepallength;
-    d += fabs(a.sepalwidth - b.sepalwidth) / value_range.sepalwidth;
-    d += fabs(a.petallength - b.petallength) / value_range.petallength;
-    d += fabs(a.petalwidth - b.petalwidth) / value_range.petalwidth;
-    return d;
+    // d += fabs(a.sepallength - b.sepallength) / value_range.sepallength;
+    // d += fabs(a.sepalwidth - b.sepalwidth) / value_range.sepalwidth;
+    // d += fabs(a.petallength - b.petallength) / value_range.petallength;
+    // d += fabs(a.petalwidth - b.petalwidth) / value_range.petalwidth;
+
+    d += (a.sepallength - b.sepallength) * (a.sepallength - b.sepallength);
+    d += (a.sepalwidth - b.sepalwidth) * (a.sepalwidth - b.sepalwidth);
+    d += (a.petallength - b.petallength) * (a.petallength - b.petallength);
+    d += (a.petalwidth - b.petalwidth) * (a.petalwidth - b.petalwidth);
+    return sqrt(d);
 }
 
 bool operator<(const pair<double, IrisPlant>& l, const pair<double, IrisPlant>& r)
@@ -182,16 +187,11 @@ int main()
     ReadInputData();
     ReadTestData();
     ReadExpectedResults();
-    //SplitTheInputData();
-
-    /*vector<pair<double, IrisPlant> > v = GetKNearesNeighbours(test_data[1], 10);
-    cout << test_data[1].sepallength << " " << test_data[1].sepalwidth << " " << test_data[1].petallength << " " << test_data[1].petalwidth<< " " << test_data[1].cl << endl;
-    for (int i = 0; i < v.size(); i++) {
-        cout << v[i].second.sepallength << " " << v[i].second.sepalwidth << " " << v[i].second.petallength << " " << v[i].second.petalwidth << " " << v[i].second.cl << " " << v[i].first << endl;
-    }*/
-
+    
     vector<pair<double, IrisPlant> > nearest;
     int classes[] = { 0, 0, 0, 0 };
+
+    cout<<"my|expected|match\n";
 
     for (int i = 0; i < test_data.size(); i++) {
         nearest = GetKNearesNeighbours(test_data[i], K);
@@ -208,7 +208,7 @@ int main()
                 count = classes[j];
             }
         }
-        cout << (test_data[i].cl == expected_results[i]) << " " << test_data[i].cl << " " << expected_results[i] << endl;
+        cout << test_data[i].cl << "|" << expected_results[i] << "|"  << (test_data[i].cl == expected_results[i]) << endl;
     }
 
     return 0;
