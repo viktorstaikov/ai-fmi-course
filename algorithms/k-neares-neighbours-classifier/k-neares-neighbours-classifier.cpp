@@ -150,35 +150,18 @@ bool operator<(const pair<double, IrisPlant>& l, const pair<double, IrisPlant>& 
 
 vector<pair<double, IrisPlant> > GetKNearesNeighbours(const IrisPlant& plant, int k)
 {
-    //keep the farest element on top
-    priority_queue<pair<double, IrisPlant> > pq;
-    pair<double, IrisPlant> top;
-
     vector<pair<double, IrisPlant> > v;
+    double dist = 0.0;
 
-    int i, sz = input_data.size();
-    int limit = min(k, sz);
-    double d = 0;
-    IrisPlant tmp;
-    for (i = 0; i < limit; i++) {
-        d = Distance(plant, input_data[i]);
-        pq.push(make_pair(d, input_data[i]));
-    }
-    for (i = limit; i < sz; i++) {
-        tmp = input_data[i];
-        top = pq.top();
-        d = Distance(plant, tmp);
-
-        if (d < top.first) {
-            pq.pop();
-            pq.push(make_pair(d, tmp));
-        }
+    for (int i = 0; i < input_data.size(); ++i)
+    {
+        dist = Distance(plant, input_data[i]);
+        v.push_back(make_pair(dist, input_data[i]));
     }
 
-    while (!pq.empty()) {
-        v.push_back(pq.top());
-        pq.pop();
-    }
+    sort(v.begin(), v.end());
+    v.erase(v.begin() + k, v.end());
+
     return v;
 }
 
@@ -189,11 +172,10 @@ int main()
     ReadExpectedResults();
     
     vector<pair<double, IrisPlant> > nearest;
-    int classes[] = { 0, 0, 0, 0 };
-
-    cout<<"my|expected|match\n";
-
+    
     for (int i = 0; i < test_data.size(); i++) {
+        int classes[] = { 0, 0, 0, 0 };
+
         nearest = GetKNearesNeighbours(test_data[i], K);
 
         for (int j = 0; j < nearest.size(); j++) {
@@ -208,7 +190,7 @@ int main()
                 count = classes[j];
             }
         }
-        cout << test_data[i].cl << "|" << expected_results[i] << "|"  << (test_data[i].cl == expected_results[i]) << endl;
+        cout << test_data[i].cl << "  " << expected_results[i] << endl;
     }
 
     return 0;
